@@ -44,5 +44,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 //        DisplayData displayData = new DisplayData(testArrayList);
+//        GraphFragment graphFragment = new GraphFragment();
+//        GraphFragment actualGraphFragment = graphFragment.;
     }
 }
