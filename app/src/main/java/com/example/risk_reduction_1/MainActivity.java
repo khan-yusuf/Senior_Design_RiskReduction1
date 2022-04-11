@@ -14,6 +14,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.*;
 import java.io.*;
 
@@ -22,6 +25,8 @@ import java.io.*;
 //import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,31 +38,53 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final TextView textView = (TextView) findViewById(R.id.text);
-// ...
+        displayDataAsText = findViewById(R.id.display_data);
+
 
 // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://www.google.com";
 
-// Request a string response from the provided URL.
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // Display the first 500 characters of the response string.
-                        textView.setText("Response is: " + response.substring(0,500));
-                    }
-                }, new Response.ErrorListener() {
+
+        //test API for front end development
+        String responseHoster = "https://reqres.in/api/users";
+
+        Response.Listener<String> responseListener = new Response.Listener<String>(){
+            @Override
+            public void onResponse(String response) {
+                try {
+                    JSONObject jsonResponse = new JSONObject(response); //create a JSON object from the response we got
+                    String field1 = jsonResponse.getString("field1");
+                    String field2 = jsonResponse.getString("field2");
+                    displayDataAsText.setText("Field 1 is: "+ field1 + "\n"+
+                                                "Field 2 is : "+ field2 +"\n");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+
+        Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                textView.setText("That didn't work!");
+                displayDataAsText.setText("Error in posting information");
             }
-        });
+        };
 
-// Add the request to the RequestQueue.
+        StringRequest stringRequest = new StringRequest( Request.Method.POST, responseHoster, responseListener, errorListener) {
+            @Override
+            protected Map<String, String> getParams() {
+                //Guessing need a key:value structure in order to use JSON
+                //on the response
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("field1", "Text for field one");
+                params.put("field2", "Text from field 2");
+
+                return params;
+            }
+        };
+
         queue.add(stringRequest);
-
 
 //        //Create intent to start another activity (currently used for uncreated activity)
 ////        Intent display_data_intent = new Intent(this, DisplayData.class);
