@@ -2,6 +2,9 @@ package com.example.risk_reduction_1;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,9 +33,11 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_ENABLE_BT = 1; //setting 1 to be request code of BT permission
     private TextView displayDataAsText;
 //    GraphView graphView;
 
@@ -45,6 +50,34 @@ public class MainActivity extends AppCompatActivity {
         EditText inputField = findViewById(R.id.input_field);
         Button sendButton = findViewById(R.id.post_button);
 
+        Button bluetoothButton = findViewById(R.id.Bluetooth);
+
+        BluetoothManager bluetoothManager = getSystemService(BluetoothManager.class);
+        BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
+
+        //Check if device supports Bluetooth
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Log.e("Bluetooth", "Device doesn't support bluetooth");
+        }
+
+        //If bluetooth is not enabled, ask user to enable bluetooth
+        if (!bluetoothAdapter.isEnabled()){
+            Intent enableBTIntent = new Intent (BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT); //latter field is a request code. arbitrarily chosen to be 1
+        }
+
+        //Perform check to see if device is already been paired before
+        BluetoothDevice mDevice;
+        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices(); //set containing all paired Bluetooth devices on Android device
+        if (pairedDevices.size() > 0){
+            //Iterate through list of paired devices and check if device has been paired in the past
+            for (BluetoothDevice device : pairedDevices){
+                String deviceName = device.getName();
+                //if (deviceName == [Microcontroller's name])
+                    //mDevice = device
+            }
+        }
 
         //Set SEND button on click behavior
         sendButton.setOnClickListener(new View.OnClickListener() {
@@ -58,6 +91,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    public void sendBluetooth(View view) {
+        Intent intent = new Intent(this, Bluetooth_Activity.class);
+        startActivity(intent);
     }
 
     private void postData (String field1Data){
